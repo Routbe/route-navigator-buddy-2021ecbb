@@ -24,6 +24,17 @@
 - [ ] ROUT Developer Console en OAuth/OIDC-provider veilig ontwerpen en bouwen.
 - [ ] Sovereign Wallet, credential-uitgifte en publiek tonen veilig ontwerpen en bouwen.
 
+## Security- en profielaudit (okt 2026)
+- [x] Alias-SSR en clientweergave lezen uitsluitend `alias_profiles`.
+- [x] Ongeverifieerde profielen zijn geblokkeerd op de schone root-URL.
+- [x] Verificatie en betaling staan uitsluitend in de vergrendelde Studio-tab.
+- [x] Strikte serverschema's toegevoegd voor profiel-, alias- en metadatawrites.
+- [x] Automatische promotie van het oudste account verwijderd.
+- [ ] Eenmalige beheerderstoken, account-mergebeveiliging en logredactie afronden.
+- [ ] Passkeys, TOTP, herstelcodes en herstelkanalen volledig aansluiten.
+- [ ] Juridische inhoud, footer, Turnstile-contactflow en vier talen nalopen.
+- [ ] Neon-schema read-only controleren (geblokkeerd door ontbrekende `DATABASE_URL`).
+
 ## Login & ontwikkelaars (okt 2026)
 - [x] Preview-/lokale adressen vertrouwd, knoppen zonder sleutels verborgen, Neon Auth-pakket weg.
 - [x] Browsertest: registreren, sessie, uitloggen, fout wachtwoord, Infomaniak-doorsturing.

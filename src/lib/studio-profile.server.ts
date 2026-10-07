@@ -232,7 +232,8 @@ export async function readPublicProfile(rawHandle: string) {
              to_jsonb(profiles) ->> 'business_name' as business_name,
              coalesce((to_jsonb(profiles) ->> 'is_influencer')::boolean, false) as is_influencer
         from public.profiles
-       where (lower(username) = ${username}
+       where coalesce(verified, false) = true
+         and (lower(username) = ${username}
               or lower(coalesce(subdomain_alias, '')) = ${username})
          and coalesce(is_banned, false) = false
        order by (lower(username) = ${username}) desc
@@ -248,6 +249,7 @@ export async function readPublicProfile(rawHandle: string) {
              blocks, verified, created_at
         from public.profiles
        where lower(username) = ${username}
+         and coalesce(verified, false) = true
        limit 1
     `) as Row[];
   }

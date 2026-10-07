@@ -1,5 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireAuth } from "@/lib/auth/middleware";
+
+function validateBootstrapToken(data: unknown): { token: string } {
+  return z.strictObject({ token: z.string().trim().min(16).max(512) }).parse(data);
+}
 
 /**
  * Development bootstrap probe: reports whether the platform still has no
@@ -8,15 +13,23 @@ import { z } from "zod";
  */
 export const getBootstrapState = createServerFn({ method: "GET" }).handler(async () => {
   try {
-    const { ensureBootstrapAdmin } = await import("./auth/owner-admin.server");
-    // Zelfherstellend: bestaat er nog geen beheerder, dan krijgt het
-    // eigenaarsaccount (hallo@rout.be) of het oudste account de rol.
-    const hasAdmin = await ensureBootstrapAdmin();
+    const { hasBootstrapAdmin } = await import("./auth/owner-admin.server");
+    const hasAdmin = await hasBootstrapAdmin();
     return { needsFirstAdmin: !hasAdmin };
   } catch {
     return { needsFirstAdmin: false };
   }
 });
+
+/** Claims the first admin role with the server-configured, single-use token. */
+export const claimFirstAdmin = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .inputValidator(validateBootstrapToken)
+  .handler(async ({ data, context }) => {
+    const { claimBootstrapAdmin } = await import("./auth/owner-admin.server");
+    const ok = await claimBootstrapAdmin(context.userId, data.token);
+    return { ok };
+  });
 
 /**
  * Public handle availability probe used by the onboarding form.

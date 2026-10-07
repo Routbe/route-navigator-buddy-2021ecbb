@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/lib/auth/middleware";
+import { z } from "zod";
 
 /**
  * RPC-laag voor het gratis aliasprofiel (`rout.be/u/<handle>`), dat volledig
@@ -50,9 +51,44 @@ export type SaveAliasProfileInput = {
   displayPrefs?: Record<string, Json> | null;
 };
 
+const jsonValueSchema = z.union([
+  z.string().max(20_000),
+  z.number().finite(),
+  z.boolean(),
+  z.null(),
+]);
+const jsonRecordSchema = z.record(z.union([jsonValueSchema, z.array(jsonValueSchema).max(100)]));
+const optionalUrlSchema = z
+  .string()
+  .trim()
+  .max(2_000)
+  .refine((value) => !value || value.startsWith("https://") || value.startsWith("data:image/"), "invalid_url")
+  .nullable()
+  .optional();
+const saveAliasProfileSchema = z.strictObject({
+  username: z.string().trim().min(1).max(60),
+  displayName: z.string().trim().max(120).nullable().optional(),
+  tagline: z.string().trim().max(240).nullable().optional(),
+  avatarUrl: optionalUrlSchema,
+  faviconUrl: optionalUrlSchema,
+  theme: z.string().trim().min(1).max(40).nullable().optional(),
+  cardStyle: z.string().trim().min(1).max(40).nullable().optional(),
+  blocks: z.array(jsonRecordSchema).max(100).optional(),
+  displayPrefs: jsonRecordSchema.nullable().optional(),
+});
+const handleSchema = z.strictObject({ handle: z.string().trim().min(1).max(60) });
+
+function validateAliasProfile(input: unknown): SaveAliasProfileInput {
+  return saveAliasProfileSchema.parse(input) as SaveAliasProfileInput;
+}
+
+function validateHandle(input: unknown): { handle: string } {
+  return handleSchema.parse(input);
+}
+
 export const saveAliasProfile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: SaveAliasProfileInput) => input)
+  .inputValidator(validateAliasProfile)
   .handler(async ({ data, context }) => {
     const { writeAliasProfile } = await import("./alias-profile.server");
     try {
@@ -66,7 +102,7 @@ export const saveAliasProfile = createServerFn({ method: "POST" })
 
 export const checkAliasHandle = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: { handle: string }) => input)
+  .inputValidator(validateHandle)
   .handler(async ({ data, context }) => {
     const { isAliasHandleFree } = await import("./alias-profile.server");
     return isAliasHandleFree(data.handle, context.userId);
@@ -74,7 +110,7 @@ export const checkAliasHandle = createServerFn({ method: "POST" })
 
 /** Publieke read voor de `/u/<handle>`-pagina's — geen auth nodig. */
 export const getPublicAliasProfileByHandle = createServerFn({ method: "GET" })
-  .inputValidator((input: { handle: string }) => input)
+  .inputValidator(validateHandle)
   .handler(async ({ data }) => {
     const { readPublicAliasProfile } = await import("./alias-profile.server");
     const row = await readPublicAliasProfile(data.handle);

@@ -1,18 +1,16 @@
--- Zorgt dat hallo@rout.be (of het oudste account, indien dat adres nog niet
--- bestaat) meteen de rol `admin` heeft, zodat de "setupmodus"-banner nooit
--- onterecht blijft staan op een omgeving die al gebruikers heeft.
+-- Historische bootstrap: kent de rol alleen aan het expliciete eigenaarsadres
+-- toe. Een eerste andere beheerder gebruikt de eenmalige tokenflow uit db/49.
 --
 -- Idempotent: mag zonder gevolgen herhaald worden bij elke deploy.
 --
 -- De runtime-tegenhanger staat in src/lib/auth/owner-admin.server.ts
--- (ensureOwnerAdmin / ensureBootstrapAdmin), die dit ook afdwingt bij elke
+-- (ensureOwnerAdmin / claimBootstrapAdmin), die dit ook afdwingt bij elke
 -- registratie en login. Deze migratie dekt bestaande omgevingen waar dat
 -- pad nog niet is doorlopen.
 
 do $$
 declare
   owner_id uuid;
-  fallback_id uuid;
 begin
   if to_regclass('public.users') is null or to_regclass('public.user_roles') is null then
     return;
@@ -31,20 +29,6 @@ begin
     on conflict (user_id, role) do nothing;
   end if;
 
-  -- 2. Bestaat er nog geen enkele beheerder, dan krijgt het oudste account
-  --    de rol (dekt omgevingen waar hallo@rout.be nog niet is aangemaakt).
-  if not exists (select 1 from public.user_roles where role::text = 'admin') then
-    select id into fallback_id
-      from public.users
-     order by created_at asc
-     limit 1;
-
-    if fallback_id is not null then
-      insert into public.user_roles (user_id, role)
-      values (fallback_id, 'admin')
-      on conflict (user_id, role) do nothing;
-    end if;
-  end if;
 end
 $$;
 
