@@ -61,3 +61,9 @@
 - [ ] db/46 en db/48 op Neon uitvoeren (wacht op DATABASE_URL; de app maakt de tabellen ook zelf aan).
 - [ ] Google-geboortedatum (scope user.birthday.read) — wacht op jouw akkoord + Google-review.
 - [ ] Geboortedatumcontrole ook vóór andere betaalde acties.
+
+## Console en officiële press kit (okt 2026)
+- [ ] Zelfstandige `/console` workspace met Quick Access en aparte API/MCP-pagina’s.
+- [ ] Consumentennavigatie vervangen door één Developer Console-ingang.
+- [ ] Favicon en press kit herstellen met het officiële vrijstaande konijn.
+- [ ] Console- en pressroutes visueel en technisch controleren.

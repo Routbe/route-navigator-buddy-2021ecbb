@@ -13,7 +13,7 @@ export function ConsolePage({
   children: ReactNode;
 }) {
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-10 lg:px-10">
+    <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-10">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
         <div>
           <h1 className="font-display text-3xl tracking-tight">{title}</h1>
