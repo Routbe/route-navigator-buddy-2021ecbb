@@ -50,9 +50,13 @@ export type SaveStudioProfileInput = {
   displayPrefs?: Record<string, Json> | null;
 };
 
-const jsonSchema: z.ZodType<Json> = z.lazy(() =>
-  z.union([z.string().max(20_000), z.number().finite(), z.boolean(), z.null(), z.array(jsonSchema).max(100), z.record(jsonSchema)]),
-);
+const jsonValueSchema = z.union([
+  z.string().max(20_000),
+  z.number().finite(),
+  z.boolean(),
+  z.null(),
+]);
+const jsonRecordSchema = z.record(z.union([jsonValueSchema, z.array(jsonValueSchema).max(100)]));
 const optionalUrlSchema = z
   .string()
   .trim()
@@ -68,8 +72,8 @@ const saveStudioProfileSchema = z.strictObject({
   faviconUrl: optionalUrlSchema,
   theme: z.string().trim().min(1).max(40).nullable().optional(),
   cardStyle: z.string().trim().min(1).max(40).nullable().optional(),
-  blocks: z.array(jsonSchema).max(100).optional(),
-  displayPrefs: z.record(jsonSchema).nullable().optional(),
+  blocks: z.array(jsonRecordSchema).max(100).optional(),
+  displayPrefs: jsonRecordSchema.nullable().optional(),
 });
 const handleSchema = z.strictObject({ handle: z.string().trim().min(1).max(60) });
 
