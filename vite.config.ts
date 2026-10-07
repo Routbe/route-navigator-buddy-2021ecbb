@@ -7,7 +7,11 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Op Vercel: zet NITRO_PRESET=vercel zodat de server als Vercel-functie gebouwd wordt.
+const nitroPreset = process.env["NITRO_PRESET"] || (process.env["VERCEL"] ? "vercel" : undefined);
+
 export default defineConfig({
+  ...(nitroPreset ? { nitro: { preset: nitroPreset } } : {}),
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
