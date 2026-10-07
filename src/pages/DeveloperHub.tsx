@@ -361,7 +361,7 @@ const SCOPES = [
   "domains:read",
 ] as const;
 
-function ApiKeys() {
+export function ApiKeys() {
   const [rows, setRows] = useState<KeyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");

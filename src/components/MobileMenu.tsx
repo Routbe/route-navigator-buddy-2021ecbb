@@ -5,7 +5,7 @@ import {
   Layers,
   Link2,
   Globe,
-  KeyRound,
+  PanelsTopLeft,
   BookOpen,
   Palette,
   ShieldCheck,
@@ -38,7 +38,7 @@ const TOOLS = [
 
 const INFRASTRUCTURE = [
   { to: "/domains", label: "Custom Domains", hint: "menu.domains.hint", icon: Globe },
-  { to: "/api", label: "API & MCP Endpoints", hint: "menu.api.hint", icon: KeyRound },
+  { to: "/console", label: "Developer Console", hint: "menu.api.hint", icon: PanelsTopLeft },
   { to: "/self-hosting", label: "Open Source & Docs", hint: "menu.docs.hint", icon: BookOpen },
 ] as const;
 

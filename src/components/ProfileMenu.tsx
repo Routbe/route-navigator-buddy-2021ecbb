@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ShieldCheck,
   Sparkles,
+  PanelsTopLeft,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -147,6 +148,11 @@ export function ProfileMenu() {
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => nav("/settings")} className="gap-2">
             <Settings className="h-4 w-4 shrink-0" aria-hidden /> Account &amp; Security
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <a href="/console" target="_blank" rel="noopener noreferrer" className="gap-2">
+              <PanelsTopLeft className="h-4 w-4 shrink-0" aria-hidden /> Developer Console
+            </a>
           </DropdownMenuItem>
 
           {isAdmin ? (

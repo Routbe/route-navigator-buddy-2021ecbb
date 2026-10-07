@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import Page from "@/pages/DeveloperHub";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/api")({
   head: () => ({
@@ -18,5 +17,7 @@ export const Route = createFileRoute("/api")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Page,
+  beforeLoad: () => {
+    throw redirect({ to: "/console" });
+  },
 });
