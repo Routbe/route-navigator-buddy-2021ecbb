@@ -47,6 +47,7 @@ import { Route as DotwellKnownAtprotoDidRouteImport } from './routes/[.]well-kno
 import { Route as DotwellKnownJwksDotjsonRouteImport } from './routes/[.]well-known.jwks[.]json'
 import { Route as DotwellKnownOpenidConfigurationRouteImport } from './routes/[.]well-known.openid-configuration'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedConsoleRouteImport } from './routes/_authenticated/console'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDomainsRouteImport } from './routes/_authenticated/domains'
 import { Route as AuthenticatedMyDataRouteImport } from './routes/_authenticated/my-data'
@@ -71,7 +72,11 @@ import { Route as AuthenticatedAdminSepaRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminSubdomainsRouteImport } from './routes/_authenticated/admin.subdomains'
 import { Route as AuthenticatedAdminVerificationsRouteImport } from './routes/_authenticated/admin.verifications'
 import { Route as AuthenticatedAdminWebhooksRouteImport } from './routes/_authenticated/admin.webhooks'
+import { Route as AuthenticatedConsoleIndexRouteImport } from './routes/_authenticated/console.index'
+import { Route as AuthenticatedConsoleApiRouteImport } from './routes/_authenticated/console.api'
 import { Route as AuthenticatedConsoleAppsRouteImport } from './routes/_authenticated/console.apps'
+import { Route as AuthenticatedConsoleBillingRouteImport } from './routes/_authenticated/console.billing'
+import { Route as AuthenticatedConsoleConnectorsRouteImport } from './routes/_authenticated/console.connectors'
 import { Route as AuthenticatedDashboardBlueskyRouteImport } from './routes/_authenticated/dashboard.bluesky'
 import { Route as AuthenticatedDashboardDomainsRouteImport } from './routes/_authenticated/dashboard.domains'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
@@ -305,6 +310,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedConsoleRoute = AuthenticatedConsoleRouteImport.update({
+  id: '/console',
+  path: '/console',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -430,11 +440,34 @@ const AuthenticatedAdminWebhooksRoute =
     path: '/webhooks',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedConsoleIndexRoute =
+  AuthenticatedConsoleIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedConsoleRoute,
+  } as any)
+const AuthenticatedConsoleApiRoute = AuthenticatedConsoleApiRouteImport.update({
+  id: '/api',
+  path: '/api',
+  getParentRoute: () => AuthenticatedConsoleRoute,
+} as any)
 const AuthenticatedConsoleAppsRoute =
   AuthenticatedConsoleAppsRouteImport.update({
-    id: '/console/apps',
-    path: '/console/apps',
-    getParentRoute: () => AuthenticatedRoute,
+    id: '/apps',
+    path: '/apps',
+    getParentRoute: () => AuthenticatedConsoleRoute,
+  } as any)
+const AuthenticatedConsoleBillingRoute =
+  AuthenticatedConsoleBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedConsoleRoute,
+  } as any)
+const AuthenticatedConsoleConnectorsRoute =
+  AuthenticatedConsoleConnectorsRouteImport.update({
+    id: '/connectors',
+    path: '/connectors',
+    getParentRoute: () => AuthenticatedConsoleRoute,
   } as any)
 const AuthenticatedDashboardBlueskyRoute =
   AuthenticatedDashboardBlueskyRouteImport.update({
@@ -706,6 +739,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/jwks.json': typeof DotwellKnownJwksDotjsonRoute
   '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/console': typeof AuthenticatedConsoleRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/domains': typeof AuthenticatedDomainsRoute
   '/my-data': typeof AuthenticatedMyDataRoute
@@ -730,7 +764,10 @@ export interface FileRoutesByFullPath {
   '/admin/subdomains': typeof AuthenticatedAdminSubdomainsRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
+  '/console/api': typeof AuthenticatedConsoleApiRoute
   '/console/apps': typeof AuthenticatedConsoleAppsRouteWithChildren
+  '/console/billing': typeof AuthenticatedConsoleBillingRoute
+  '/console/connectors': typeof AuthenticatedConsoleConnectorsRoute
   '/dashboard/bluesky': typeof AuthenticatedDashboardBlueskyRoute
   '/dashboard/domains': typeof AuthenticatedDashboardDomainsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -747,6 +784,7 @@ export interface FileRoutesByFullPath {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/console/': typeof AuthenticatedConsoleIndexRoute
   '/console/apps/$appId': typeof AuthenticatedConsoleAppsAppIdRouteWithChildren
   '/api/public/auth/providers': typeof ApiPublicAuthProvidersRoute
   '/api/public/badge/$handle': typeof ApiPublicBadgeHandleRoute
@@ -835,6 +873,9 @@ export interface FileRoutesByTo {
   '/admin/subdomains': typeof AuthenticatedAdminSubdomainsRoute
   '/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
+  '/console/api': typeof AuthenticatedConsoleApiRoute
+  '/console/billing': typeof AuthenticatedConsoleBillingRoute
+  '/console/connectors': typeof AuthenticatedConsoleConnectorsRoute
   '/dashboard/bluesky': typeof AuthenticatedDashboardBlueskyRoute
   '/dashboard/domains': typeof AuthenticatedDashboardDomainsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -851,6 +892,7 @@ export interface FileRoutesByTo {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/console': typeof AuthenticatedConsoleIndexRoute
   '/api/public/auth/providers': typeof ApiPublicAuthProvidersRoute
   '/api/public/badge/$handle': typeof ApiPublicBadgeHandleRoute
   '/api/public/bluesky/callback': typeof ApiPublicBlueskyCallbackRoute
@@ -917,6 +959,7 @@ export interface FileRoutesById {
   '/.well-known/jwks.json': typeof DotwellKnownJwksDotjsonRoute
   '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/console': typeof AuthenticatedConsoleRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/domains': typeof AuthenticatedDomainsRoute
   '/_authenticated/my-data': typeof AuthenticatedMyDataRoute
@@ -941,7 +984,10 @@ export interface FileRoutesById {
   '/_authenticated/admin/subdomains': typeof AuthenticatedAdminSubdomainsRoute
   '/_authenticated/admin/verifications': typeof AuthenticatedAdminVerificationsRoute
   '/_authenticated/admin/webhooks': typeof AuthenticatedAdminWebhooksRoute
+  '/_authenticated/console/api': typeof AuthenticatedConsoleApiRoute
   '/_authenticated/console/apps': typeof AuthenticatedConsoleAppsRouteWithChildren
+  '/_authenticated/console/billing': typeof AuthenticatedConsoleBillingRoute
+  '/_authenticated/console/connectors': typeof AuthenticatedConsoleConnectorsRoute
   '/_authenticated/dashboard/bluesky': typeof AuthenticatedDashboardBlueskyRoute
   '/_authenticated/dashboard/domains': typeof AuthenticatedDashboardDomainsRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -958,6 +1004,7 @@ export interface FileRoutesById {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/_authenticated/console/': typeof AuthenticatedConsoleIndexRoute
   '/_authenticated/console/apps/$appId': typeof AuthenticatedConsoleAppsAppIdRouteWithChildren
   '/api_/public/auth/providers': typeof ApiPublicAuthProvidersRoute
   '/api_/public/badge/$handle': typeof ApiPublicBadgeHandleRoute
@@ -1025,6 +1072,7 @@ export interface FileRouteTypes {
     | '/.well-known/jwks.json'
     | '/.well-known/openid-configuration'
     | '/admin'
+    | '/console'
     | '/dashboard'
     | '/domains'
     | '/my-data'
@@ -1049,7 +1097,10 @@ export interface FileRouteTypes {
     | '/admin/subdomains'
     | '/admin/verifications'
     | '/admin/webhooks'
+    | '/console/api'
     | '/console/apps'
+    | '/console/billing'
+    | '/console/connectors'
     | '/dashboard/bluesky'
     | '/dashboard/domains'
     | '/dashboard/profile'
@@ -1066,6 +1117,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/console/'
     | '/console/apps/$appId'
     | '/api/public/auth/providers'
     | '/api/public/badge/$handle'
@@ -1154,6 +1206,9 @@ export interface FileRouteTypes {
     | '/admin/subdomains'
     | '/admin/verifications'
     | '/admin/webhooks'
+    | '/console/api'
+    | '/console/billing'
+    | '/console/connectors'
     | '/dashboard/bluesky'
     | '/dashboard/domains'
     | '/dashboard/profile'
@@ -1170,6 +1225,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/console'
     | '/api/public/auth/providers'
     | '/api/public/badge/$handle'
     | '/api/public/bluesky/callback'
@@ -1235,6 +1291,7 @@ export interface FileRouteTypes {
     | '/.well-known/jwks.json'
     | '/.well-known/openid-configuration'
     | '/_authenticated/admin'
+    | '/_authenticated/console'
     | '/_authenticated/dashboard'
     | '/_authenticated/domains'
     | '/_authenticated/my-data'
@@ -1259,7 +1316,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/subdomains'
     | '/_authenticated/admin/verifications'
     | '/_authenticated/admin/webhooks'
+    | '/_authenticated/console/api'
     | '/_authenticated/console/apps'
+    | '/_authenticated/console/billing'
+    | '/_authenticated/console/connectors'
     | '/_authenticated/dashboard/bluesky'
     | '/_authenticated/dashboard/domains'
     | '/_authenticated/dashboard/profile'
@@ -1276,6 +1336,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/_authenticated/console/'
     | '/_authenticated/console/apps/$appId'
     | '/api_/public/auth/providers'
     | '/api_/public/badge/$handle'
@@ -1645,6 +1706,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/console': {
+      id: '/_authenticated/console'
+      path: '/console'
+      fullPath: '/console'
+      preLoaderRoute: typeof AuthenticatedConsoleRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -1813,12 +1881,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminWebhooksRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/console/': {
+      id: '/_authenticated/console/'
+      path: '/'
+      fullPath: '/console/'
+      preLoaderRoute: typeof AuthenticatedConsoleIndexRouteImport
+      parentRoute: typeof AuthenticatedConsoleRoute
+    }
+    '/_authenticated/console/api': {
+      id: '/_authenticated/console/api'
+      path: '/api'
+      fullPath: '/console/api'
+      preLoaderRoute: typeof AuthenticatedConsoleApiRouteImport
+      parentRoute: typeof AuthenticatedConsoleRoute
+    }
     '/_authenticated/console/apps': {
       id: '/_authenticated/console/apps'
-      path: '/console/apps'
+      path: '/apps'
       fullPath: '/console/apps'
       preLoaderRoute: typeof AuthenticatedConsoleAppsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedConsoleRoute
+    }
+    '/_authenticated/console/billing': {
+      id: '/_authenticated/console/billing'
+      path: '/billing'
+      fullPath: '/console/billing'
+      preLoaderRoute: typeof AuthenticatedConsoleBillingRouteImport
+      parentRoute: typeof AuthenticatedConsoleRoute
+    }
+    '/_authenticated/console/connectors': {
+      id: '/_authenticated/console/connectors'
+      path: '/connectors'
+      fullPath: '/console/connectors'
+      preLoaderRoute: typeof AuthenticatedConsoleConnectorsRouteImport
+      parentRoute: typeof AuthenticatedConsoleRoute
     }
     '/_authenticated/dashboard/bluesky': {
       id: '/_authenticated/dashboard/bluesky'
@@ -2156,26 +2252,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
-interface AuthenticatedDashboardRouteChildren {
-  AuthenticatedDashboardBlueskyRoute: typeof AuthenticatedDashboardBlueskyRoute
-  AuthenticatedDashboardDomainsRoute: typeof AuthenticatedDashboardDomainsRoute
-  AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
-  AuthenticatedDashboardRoutesRoute: typeof AuthenticatedDashboardRoutesRoute
-}
-
-const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
-  {
-    AuthenticatedDashboardBlueskyRoute: AuthenticatedDashboardBlueskyRoute,
-    AuthenticatedDashboardDomainsRoute: AuthenticatedDashboardDomainsRoute,
-    AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
-    AuthenticatedDashboardRoutesRoute: AuthenticatedDashboardRoutesRoute,
-  }
-
-const AuthenticatedDashboardRouteWithChildren =
-  AuthenticatedDashboardRoute._addFileChildren(
-    AuthenticatedDashboardRouteChildren,
-  )
-
 interface AuthenticatedConsoleAppsAppIdRouteChildren {
   AuthenticatedConsoleAppsAppIdBrandingRoute: typeof AuthenticatedConsoleAppsAppIdBrandingRoute
   AuthenticatedConsoleAppsAppIdCredentialsRoute: typeof AuthenticatedConsoleAppsAppIdCredentialsRoute
@@ -2223,22 +2299,61 @@ const AuthenticatedConsoleAppsRouteWithChildren =
     AuthenticatedConsoleAppsRouteChildren,
   )
 
+interface AuthenticatedConsoleRouteChildren {
+  AuthenticatedConsoleApiRoute: typeof AuthenticatedConsoleApiRoute
+  AuthenticatedConsoleAppsRoute: typeof AuthenticatedConsoleAppsRouteWithChildren
+  AuthenticatedConsoleBillingRoute: typeof AuthenticatedConsoleBillingRoute
+  AuthenticatedConsoleConnectorsRoute: typeof AuthenticatedConsoleConnectorsRoute
+  AuthenticatedConsoleIndexRoute: typeof AuthenticatedConsoleIndexRoute
+}
+
+const AuthenticatedConsoleRouteChildren: AuthenticatedConsoleRouteChildren = {
+  AuthenticatedConsoleApiRoute: AuthenticatedConsoleApiRoute,
+  AuthenticatedConsoleAppsRoute: AuthenticatedConsoleAppsRouteWithChildren,
+  AuthenticatedConsoleBillingRoute: AuthenticatedConsoleBillingRoute,
+  AuthenticatedConsoleConnectorsRoute: AuthenticatedConsoleConnectorsRoute,
+  AuthenticatedConsoleIndexRoute: AuthenticatedConsoleIndexRoute,
+}
+
+const AuthenticatedConsoleRouteWithChildren =
+  AuthenticatedConsoleRoute._addFileChildren(AuthenticatedConsoleRouteChildren)
+
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardBlueskyRoute: typeof AuthenticatedDashboardBlueskyRoute
+  AuthenticatedDashboardDomainsRoute: typeof AuthenticatedDashboardDomainsRoute
+  AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
+  AuthenticatedDashboardRoutesRoute: typeof AuthenticatedDashboardRoutesRoute
+}
+
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardBlueskyRoute: AuthenticatedDashboardBlueskyRoute,
+    AuthenticatedDashboardDomainsRoute: AuthenticatedDashboardDomainsRoute,
+    AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
+    AuthenticatedDashboardRoutesRoute: AuthenticatedDashboardRoutesRoute,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedConsoleRoute: typeof AuthenticatedConsoleRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
   AuthenticatedDomainsRoute: typeof AuthenticatedDomainsRoute
   AuthenticatedMyDataRoute: typeof AuthenticatedMyDataRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedConsoleAppsRoute: typeof AuthenticatedConsoleAppsRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedConsoleRoute: AuthenticatedConsoleRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
   AuthenticatedDomainsRoute: AuthenticatedDomainsRoute,
   AuthenticatedMyDataRoute: AuthenticatedMyDataRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedConsoleAppsRoute: AuthenticatedConsoleAppsRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
