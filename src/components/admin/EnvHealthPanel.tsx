@@ -11,6 +11,20 @@ export function EnvHealthPanel() {
     staleTime: 60_000,
   });
 
+  const login = useQuery({
+    queryKey: ["admin", "auth-diagnose"],
+    queryFn: async () => {
+      const r = await fetch("/api/public/auth/providers?diagnose=1");
+      return (await r.json()) as {
+        baseUrl: string;
+        coreReady: boolean;
+        core: Record<string, boolean>;
+        providers: { id: string; configured: boolean; missing: string[]; callbackUrl: string }[];
+      };
+    },
+    staleTime: 60_000,
+  });
+
   return (
     <section className="rounded-2xl border border-border/70 p-4">
       <div className="flex items-center justify-between gap-2">
@@ -63,6 +77,27 @@ export function EnvHealthPanel() {
         <p className="mt-2 text-[11px] text-muted-foreground">
           Optioneel niet ingesteld: {data.missingOptional.join(", ")}
         </p>
+      ) : null}
+      {login.data ? (
+        <div className="mt-4 space-y-2 text-xs">
+          <h4 className="font-semibold">Login-providers (basis: {login.data.baseUrl})</h4>
+          <p className={login.data.coreReady ? "text-muted-foreground" : "text-destructive"}>
+            {Object.entries(login.data.core)
+              .map(([k, ok]) => `${k}: ${ok ? "ok" : "ONTBREEKT"}`)
+              .join(" · ")}
+          </p>
+          <ul className="space-y-1.5">
+            {login.data.providers.map((p) => (
+              <li key={p.id} className="rounded-xl border border-border/60 p-2">
+                <span className="font-medium capitalize">{p.id}</span>{" "}
+                {p.configured ? "✓ ingesteld" : `✗ ontbreekt: ${p.missing.join(", ")}`}
+                <span className="block break-all font-mono text-[11px] text-muted-foreground">
+                  Callback: {p.callbackUrl}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
     </section>
   );

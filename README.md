@@ -1,3 +1,5 @@
+> **Environment variables:** zie [ENVIRONMENT.md](./ENVIRONMENT.md) voor de volledige lijst met keys voor Vercel.
+
 <div align="center">
 
 <br />

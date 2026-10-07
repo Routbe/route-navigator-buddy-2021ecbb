@@ -90,6 +90,7 @@ import { Route as UUsernameDonateRouteImport } from './routes/u.$username.donate
 import { Route as UUsernameTipRouteImport } from './routes/u.$username.tip'
 import { Route as AuthenticatedConsoleAppsIndexRouteImport } from './routes/_authenticated/console.apps.index'
 import { Route as AuthenticatedConsoleAppsAppIdRouteImport } from './routes/_authenticated/console.apps.$appId'
+import { Route as ApiPublicAuthProvidersRouteImport } from './routes/api_.public.auth.providers'
 import { Route as ApiPublicBadgeHandleRouteImport } from './routes/api_.public.badge.$handle'
 import { Route as ApiPublicBlueskyCallbackRouteImport } from './routes/api_.public.bluesky.callback'
 import { Route as ApiPublicBlueskyClientMetadataDotjsonRouteImport } from './routes/api_.public.bluesky.client-metadata[.]json'
@@ -99,6 +100,7 @@ import { Route as ApiPublicCronScanTransfersRouteImport } from './routes/api_.pu
 import { Route as ApiPublicCronSecureshieldBillingRouteImport } from './routes/api_.public.cron.secureshield-billing'
 import { Route as ApiPublicCronSyncFollowersRouteImport } from './routes/api_.public.cron.sync-followers'
 import { Route as ApiPublicCronSyncSocialsRouteImport } from './routes/api_.public.cron.sync-socials'
+import { Route as ApiPublicMastodonServersRouteImport } from './routes/api_.public.mastodon.servers'
 import { Route as ApiPublicMastodonStartRouteImport } from './routes/api_.public.mastodon.start'
 import { Route as ApiPublicOauthTokenRouteImport } from './routes/api_.public.oauth.token'
 import { Route as ApiPublicOauthUserinfoRouteImport } from './routes/api_.public.oauth.userinfo'
@@ -530,6 +532,11 @@ const AuthenticatedConsoleAppsAppIdRoute =
     path: '/$appId',
     getParentRoute: () => AuthenticatedConsoleAppsRoute,
   } as any)
+const ApiPublicAuthProvidersRoute = ApiPublicAuthProvidersRouteImport.update({
+  id: '/api_/public/auth/providers',
+  path: '/api/public/auth/providers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicBadgeHandleRoute = ApiPublicBadgeHandleRouteImport.update({
   id: '/api_/public/badge/$handle',
   path: '/api/public/badge/$handle',
@@ -579,6 +586,12 @@ const ApiPublicCronSyncSocialsRoute =
   ApiPublicCronSyncSocialsRouteImport.update({
     id: '/api_/public/cron/sync-socials',
     path: '/api/public/cron/sync-socials',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicMastodonServersRoute =
+  ApiPublicMastodonServersRouteImport.update({
+    id: '/api_/public/mastodon/servers',
+    path: '/api/public/mastodon/servers',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicMastodonStartRoute = ApiPublicMastodonStartRouteImport.update({
@@ -735,6 +748,7 @@ export interface FileRoutesByFullPath {
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
   '/console/apps/$appId': typeof AuthenticatedConsoleAppsAppIdRouteWithChildren
+  '/api/public/auth/providers': typeof ApiPublicAuthProvidersRoute
   '/api/public/badge/$handle': typeof ApiPublicBadgeHandleRoute
   '/api/public/bluesky/callback': typeof ApiPublicBlueskyCallbackRoute
   '/api/public/bluesky/client-metadata.json': typeof ApiPublicBlueskyClientMetadataDotjsonRoute
@@ -744,6 +758,7 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/secureshield-billing': typeof ApiPublicCronSecureshieldBillingRoute
   '/api/public/cron/sync-followers': typeof ApiPublicCronSyncFollowersRoute
   '/api/public/cron/sync-socials': typeof ApiPublicCronSyncSocialsRoute
+  '/api/public/mastodon/servers': typeof ApiPublicMastodonServersRoute
   '/api/public/mastodon/start': typeof ApiPublicMastodonStartRoute
   '/api/public/oauth/token': typeof ApiPublicOauthTokenRoute
   '/api/public/oauth/userinfo': typeof ApiPublicOauthUserinfoRoute
@@ -836,6 +851,7 @@ export interface FileRoutesByTo {
   '/u/$username/$slug': typeof UUsernameSlugRoute
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
+  '/api/public/auth/providers': typeof ApiPublicAuthProvidersRoute
   '/api/public/badge/$handle': typeof ApiPublicBadgeHandleRoute
   '/api/public/bluesky/callback': typeof ApiPublicBlueskyCallbackRoute
   '/api/public/bluesky/client-metadata.json': typeof ApiPublicBlueskyClientMetadataDotjsonRoute
@@ -845,6 +861,7 @@ export interface FileRoutesByTo {
   '/api/public/cron/secureshield-billing': typeof ApiPublicCronSecureshieldBillingRoute
   '/api/public/cron/sync-followers': typeof ApiPublicCronSyncFollowersRoute
   '/api/public/cron/sync-socials': typeof ApiPublicCronSyncSocialsRoute
+  '/api/public/mastodon/servers': typeof ApiPublicMastodonServersRoute
   '/api/public/mastodon/start': typeof ApiPublicMastodonStartRoute
   '/api/public/oauth/token': typeof ApiPublicOauthTokenRoute
   '/api/public/oauth/userinfo': typeof ApiPublicOauthUserinfoRoute
@@ -942,6 +959,7 @@ export interface FileRoutesById {
   '/u/$username/donate': typeof UUsernameDonateRoute
   '/u/$username/tip': typeof UUsernameTipRoute
   '/_authenticated/console/apps/$appId': typeof AuthenticatedConsoleAppsAppIdRouteWithChildren
+  '/api_/public/auth/providers': typeof ApiPublicAuthProvidersRoute
   '/api_/public/badge/$handle': typeof ApiPublicBadgeHandleRoute
   '/api_/public/bluesky/callback': typeof ApiPublicBlueskyCallbackRoute
   '/api_/public/bluesky/client-metadata.json': typeof ApiPublicBlueskyClientMetadataDotjsonRoute
@@ -951,6 +969,7 @@ export interface FileRoutesById {
   '/api_/public/cron/secureshield-billing': typeof ApiPublicCronSecureshieldBillingRoute
   '/api_/public/cron/sync-followers': typeof ApiPublicCronSyncFollowersRoute
   '/api_/public/cron/sync-socials': typeof ApiPublicCronSyncSocialsRoute
+  '/api_/public/mastodon/servers': typeof ApiPublicMastodonServersRoute
   '/api_/public/mastodon/start': typeof ApiPublicMastodonStartRoute
   '/api_/public/oauth/token': typeof ApiPublicOauthTokenRoute
   '/api_/public/oauth/userinfo': typeof ApiPublicOauthUserinfoRoute
@@ -1048,6 +1067,7 @@ export interface FileRouteTypes {
     | '/u/$username/donate'
     | '/u/$username/tip'
     | '/console/apps/$appId'
+    | '/api/public/auth/providers'
     | '/api/public/badge/$handle'
     | '/api/public/bluesky/callback'
     | '/api/public/bluesky/client-metadata.json'
@@ -1057,6 +1077,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/secureshield-billing'
     | '/api/public/cron/sync-followers'
     | '/api/public/cron/sync-socials'
+    | '/api/public/mastodon/servers'
     | '/api/public/mastodon/start'
     | '/api/public/oauth/token'
     | '/api/public/oauth/userinfo'
@@ -1149,6 +1170,7 @@ export interface FileRouteTypes {
     | '/u/$username/$slug'
     | '/u/$username/donate'
     | '/u/$username/tip'
+    | '/api/public/auth/providers'
     | '/api/public/badge/$handle'
     | '/api/public/bluesky/callback'
     | '/api/public/bluesky/client-metadata.json'
@@ -1158,6 +1180,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/secureshield-billing'
     | '/api/public/cron/sync-followers'
     | '/api/public/cron/sync-socials'
+    | '/api/public/mastodon/servers'
     | '/api/public/mastodon/start'
     | '/api/public/oauth/token'
     | '/api/public/oauth/userinfo'
@@ -1254,6 +1277,7 @@ export interface FileRouteTypes {
     | '/u/$username/donate'
     | '/u/$username/tip'
     | '/_authenticated/console/apps/$appId'
+    | '/api_/public/auth/providers'
     | '/api_/public/badge/$handle'
     | '/api_/public/bluesky/callback'
     | '/api_/public/bluesky/client-metadata.json'
@@ -1263,6 +1287,7 @@ export interface FileRouteTypes {
     | '/api_/public/cron/secureshield-billing'
     | '/api_/public/cron/sync-followers'
     | '/api_/public/cron/sync-socials'
+    | '/api_/public/mastodon/servers'
     | '/api_/public/mastodon/start'
     | '/api_/public/oauth/token'
     | '/api_/public/oauth/userinfo'
@@ -1332,6 +1357,7 @@ export interface RootRouteChildren {
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   AuthMastodonCallbackRoute: typeof AuthMastodonCallbackRoute
+  ApiPublicAuthProvidersRoute: typeof ApiPublicAuthProvidersRoute
   ApiPublicBadgeHandleRoute: typeof ApiPublicBadgeHandleRoute
   ApiPublicBlueskyCallbackRoute: typeof ApiPublicBlueskyCallbackRoute
   ApiPublicBlueskyClientMetadataDotjsonRoute: typeof ApiPublicBlueskyClientMetadataDotjsonRoute
@@ -1341,6 +1367,7 @@ export interface RootRouteChildren {
   ApiPublicCronSecureshieldBillingRoute: typeof ApiPublicCronSecureshieldBillingRoute
   ApiPublicCronSyncFollowersRoute: typeof ApiPublicCronSyncFollowersRoute
   ApiPublicCronSyncSocialsRoute: typeof ApiPublicCronSyncSocialsRoute
+  ApiPublicMastodonServersRoute: typeof ApiPublicMastodonServersRoute
   ApiPublicMastodonStartRoute: typeof ApiPublicMastodonStartRoute
   ApiPublicOauthTokenRoute: typeof ApiPublicOauthTokenRoute
   ApiPublicOauthUserinfoRoute: typeof ApiPublicOauthUserinfoRoute
@@ -1919,6 +1946,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConsoleAppsAppIdRouteImport
       parentRoute: typeof AuthenticatedConsoleAppsRoute
     }
+    '/api_/public/auth/providers': {
+      id: '/api_/public/auth/providers'
+      path: '/api/public/auth/providers'
+      fullPath: '/api/public/auth/providers'
+      preLoaderRoute: typeof ApiPublicAuthProvidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api_/public/badge/$handle': {
       id: '/api_/public/badge/$handle'
       path: '/api/public/badge/$handle'
@@ -1980,6 +2014,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/cron/sync-socials'
       fullPath: '/api/public/cron/sync-socials'
       preLoaderRoute: typeof ApiPublicCronSyncSocialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api_/public/mastodon/servers': {
+      id: '/api_/public/mastodon/servers'
+      path: '/api/public/mastodon/servers'
+      fullPath: '/api/public/mastodon/servers'
+      preLoaderRoute: typeof ApiPublicMastodonServersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api_/public/mastodon/start': {
@@ -2297,6 +2338,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   AuthMastodonCallbackRoute: AuthMastodonCallbackRoute,
+  ApiPublicAuthProvidersRoute: ApiPublicAuthProvidersRoute,
   ApiPublicBadgeHandleRoute: ApiPublicBadgeHandleRoute,
   ApiPublicBlueskyCallbackRoute: ApiPublicBlueskyCallbackRoute,
   ApiPublicBlueskyClientMetadataDotjsonRoute:
@@ -2307,6 +2349,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCronSecureshieldBillingRoute: ApiPublicCronSecureshieldBillingRoute,
   ApiPublicCronSyncFollowersRoute: ApiPublicCronSyncFollowersRoute,
   ApiPublicCronSyncSocialsRoute: ApiPublicCronSyncSocialsRoute,
+  ApiPublicMastodonServersRoute: ApiPublicMastodonServersRoute,
   ApiPublicMastodonStartRoute: ApiPublicMastodonStartRoute,
   ApiPublicOauthTokenRoute: ApiPublicOauthTokenRoute,
   ApiPublicOauthUserinfoRoute: ApiPublicOauthUserinfoRoute,
