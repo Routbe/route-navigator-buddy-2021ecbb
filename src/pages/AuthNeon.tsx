@@ -15,6 +15,9 @@ import { authClient } from "@/lib/auth-client";
 import { authCallbackUrl } from "@/lib/app-url";
 import { BRAND_ICONS } from "@/utils/brandIcons";
 import { getEnabledProviders } from "@/lib/auth-providers.functions";
+import { BLUESKY_SUFFIXES, normalizeBlueskyHandle, withBlueskySuffix } from "@/lib/bluesky-handle";
+import { filterMastodonServers } from "@/lib/mastodon-servers";
+import { normalizeInstance } from "@/lib/mastodon-instance";
 
 /** Official multi-colour Google "G" — required by Google Identity branding. */
 function GoogleColorMark({ className }: { className?: string }) {
@@ -135,12 +138,33 @@ export default function AuthNeon({ initialMode = "magic" }: { initialMode?: Mode
   const [mastodonOpen, setMastodonOpen] = useState(false);
   const [mastodonInstance, setMastodonInstance] = useState("");
   const redirected = useRef(false);
+  const [remoteServers, setRemoteServers] = useState<string[]>([]);
+  useEffect(() => {
+    if (!mastodonOpen) return;
+    const q = mastodonInstance.trim();
+    const timer = setTimeout(() => {
+      fetch(`/api/public/mastodon/servers?q=${encodeURIComponent(q)}`)
+        .then((r) => (r.ok ? r.json() : { servers: [] }))
+        .then((b: { servers?: string[] }) => setRemoteServers(b.servers ?? []))
+        .catch(() => setRemoteServers([]));
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [mastodonOpen, mastodonInstance]);
+  const mastodonSuggestions = filterMastodonServers(mastodonInstance, remoteServers);
   const [enabled, setEnabled] = useState<string[] | null>(null);
 
   useEffect(() => {
-    getEnabledProviders()
-      .then((list) => setEnabled(list))
-      .catch(() => setEnabled([]));
+    // Openbare route; faalt die, dan blijft `enabled` null en proberen we gewoon.
+    fetch("/api/public/auth/providers", { credentials: "omit" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((body: { providers?: string[] }) =>
+        Array.isArray(body?.providers) ? setEnabled(body.providers) : null,
+      )
+      .catch(() =>
+        getEnabledProviders()
+          .then((list) => setEnabled(list))
+          .catch(() => setEnabled(null)),
+      );
   }, []);
 
   const KEYED = new Set(["google", "github", "gitlab", "apple", "oidc", "infomaniak"]);
@@ -386,8 +410,8 @@ export default function AuthNeon({ initialMode = "magic" }: { initialMode?: Mode
               className="mt-2 flex items-center gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                const handle = blueskyHandle.trim().replace(/^@/, "").toLowerCase();
-                if (!handle.includes(".")) {
+                const handle = normalizeBlueskyHandle(blueskyHandle);
+                if (!handle) {
                   toast.error("Geef je volledige Bluesky-naam op, bijvoorbeeld jona.bsky.social.");
                   return;
                 }
@@ -395,17 +419,38 @@ export default function AuthNeon({ initialMode = "magic" }: { initialMode?: Mode
                 window.location.href = `/api/public/bluesky/start?handle=${encodeURIComponent(handle)}&next=${encodeURIComponent("/dashboard")}`;
               }}
             >
-              <Input
-                value={blueskyHandle}
-                onChange={(e) => setBlueskyHandle(e.target.value)}
-                placeholder="jona.bsky.social"
-                aria-label="Bluesky-naam"
-                autoComplete="username"
-                className="h-10 rounded-lg"
-              />
-              <Button type="submit" className="h-10 rounded-lg" disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : "Verder"}
-              </Button>
+              <div className="flex-1 space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={blueskyHandle}
+                    onChange={(e) => setBlueskyHandle(e.target.value)}
+                    placeholder="jona.bsky.social"
+                    aria-label="Bluesky-naam"
+                    autoComplete="username"
+                    className="h-10 rounded-lg"
+                  />
+                  <Button type="submit" className="h-10 rounded-lg" disabled={loading}>
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : "Verder"}
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {BLUESKY_SUFFIXES.map((suffix) => (
+                    <button
+                      key={suffix}
+                      type="button"
+                      onClick={() => setBlueskyHandle(withBlueskySuffix(blueskyHandle, suffix))}
+                      className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      .{suffix}
+                    </button>
+                  ))}
+                </div>
+                {blueskyHandle && !blueskyHandle.includes(".") && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Wordt: <strong>{normalizeBlueskyHandle(blueskyHandle)}</strong>
+                  </p>
+                )}
+              </div>
             </form>
           )}
 
@@ -414,13 +459,8 @@ export default function AuthNeon({ initialMode = "magic" }: { initialMode?: Mode
               className="mt-2 flex items-center gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                const instance = mastodonInstance
-                  .trim()
-                  .replace(/^@/, "")
-                  .replace(/^https?:\/\//i, "")
-                  .replace(/\/.*$/, "")
-                  .toLowerCase();
-                if (!instance.includes(".")) {
+                const instance = normalizeInstance(mastodonInstance);
+                if (!instance) {
                   toast.error("Geef de server op waar je account staat, bijvoorbeeld mastodon.social.");
                   return;
                 }
@@ -428,17 +468,35 @@ export default function AuthNeon({ initialMode = "magic" }: { initialMode?: Mode
                 window.location.href = `/api/public/mastodon/start?instance=${encodeURIComponent(instance)}&next=${encodeURIComponent("/dashboard")}`;
               }}
             >
-              <Input
-                value={mastodonInstance}
-                onChange={(e) => setMastodonInstance(e.target.value)}
-                placeholder="mastodon.social"
-                aria-label="Fediverse-server"
-                autoComplete="url"
-                className="h-10 rounded-lg"
-              />
-              <Button type="submit" className="h-10 rounded-lg" disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : "Verder"}
-              </Button>
+              <div className="flex-1 space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={mastodonInstance}
+                    onChange={(e) => setMastodonInstance(e.target.value)}
+                    placeholder="mastodon.social"
+                    aria-label="Fediverse-server"
+                    autoComplete="off"
+                    className="h-10 rounded-lg"
+                  />
+                  <Button type="submit" className="h-10 rounded-lg" disabled={loading}>
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : "Verder"}
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1.5" role="listbox" aria-label="Voorgestelde servers">
+                  {mastodonSuggestions.map((host) => (
+                    <button
+                      key={host}
+                      type="button"
+                      role="option"
+                      aria-selected={mastodonInstance === host}
+                      onClick={() => setMastodonInstance(host)}
+                      className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      {host}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </form>
           )}
 
