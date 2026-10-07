@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireAuth } from "@/lib/auth/middleware";
 
 /**
  * Development bootstrap probe: reports whether the platform still has no
@@ -15,6 +16,18 @@ export const getBootstrapState = createServerFn({ method: "GET" }).handler(async
     return { needsFirstAdmin: false };
   }
 });
+
+/** Claims the first admin role with the server-configured, single-use token. */
+export const claimFirstAdmin = createServerFn({ method: "POST" })
+  .middleware([requireAuth])
+  .inputValidator((data: unknown) =>
+    z.strictObject({ token: z.string().trim().min(16).max(512) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { claimBootstrapAdmin } = await import("./auth/owner-admin.server");
+    const ok = await claimBootstrapAdmin(context.userId, data.token);
+    return { ok };
+  });
 
 /**
  * Public handle availability probe used by the onboarding form.

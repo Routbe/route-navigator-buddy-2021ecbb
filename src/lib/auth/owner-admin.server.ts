@@ -4,14 +4,14 @@ import { sql } from "@/lib/neon";
  * Bootstrap van de beheerdersrol.
  *
  * De "setupmodus"-banner verschijnt zolang er geen enkele rij met rol `admin`
- * in `public.user_roles` staat. Deze helpers zorgen dat dat vanzelf goedkomt:
+ * in `public.user_roles` staat. Deze helpers regelen de veilige toekenning:
  *
  *  1. de eigenaarsadressen (standaard `hallo@rout.be`, te overschrijven met
  *     `OWNER_EMAILS`) krijgen altijd de rol `admin`;
  *  2. het oudste account krijgt de rol uitsluitend na invoer van de eenmalige
  *     ADMIN_BOOTSTRAP_TOKEN via de beveiligde bootstrapactie.
  *
- * Alles is idempotent — herhaald aanroepen is veilig.
+ * De automatische eigenaarstoekenning is idempotent; de tokenclaim is eenmalig.
  */
 
 function ownerEmails(): string[] {
@@ -43,8 +43,7 @@ async function hasAnyAdmin(): Promise<boolean> {
 }
 
 /**
- * Geeft dit account de beheerdersrol wanneer het een eigenaarsadres is, of
- * wanneer er nog helemaal geen beheerder bestaat en dit het oudste account is.
+ * Geeft dit account de beheerdersrol wanneer het een eigenaarsadres is.
  * Faalt nooit hard: authenticatie mag hier niet op stuklopen.
  */
 export async function ensureOwnerAdmin(
@@ -64,9 +63,7 @@ export async function ensureOwnerAdmin(
 }
 
 /**
- * Zorgt dat er minstens één beheerder bestaat: eerst een eigenaarsaccount,
- * anders het oudste account in de database. Geeft terug of er (nu) een
- * beheerder is.
+ * Geeft terug of er al minstens één beheerder bestaat.
  */
 export async function hasBootstrapAdmin(): Promise<boolean> {
   try {

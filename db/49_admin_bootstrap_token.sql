@@ -8,5 +8,4 @@ create table if not exists public.admin_bootstrap_tokens (
   consumed_at timestamptz not null default now()
 );
 
-grant select, insert on public.admin_bootstrap_tokens to authenticated;
 grant all on public.admin_bootstrap_tokens to service_role;
