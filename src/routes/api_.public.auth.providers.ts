@@ -13,7 +13,7 @@ export const Route = createFileRoute("/api_/public/auth/providers")({
         const diagnose = new URL(request.url).searchParams.get("diagnose") === "1";
         return Response.json(
           diagnose
-            ? { providers: enabledProviders(), ...authDiagnostics(request) }
+            ? { enabled: enabledProviders(), ...authDiagnostics(request) }
             : { providers: enabledProviders() },
           { headers: { "cache-control": "no-store" } },
         );
