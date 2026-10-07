@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireAuth } from "@/lib/auth/middleware";
 
 /**
  * Session lookup for the browser.
@@ -32,14 +34,20 @@ export const getSessionUser = createServerFn({ method: "GET" }).handler(
 
 /** Profile metadata only — credentials are managed in Neon Auth. */
 export const updateAuthUser = createServerFn({ method: "POST" })
-  .inputValidator((input: { metadata?: Record<string, unknown> }) => input)
-  .handler(async ({ data }): Promise<{ ok: boolean; message?: string }> => {
-    const { currentUser } = await import("@/lib/auth/session.server");
-    const user = await currentUser();
-    if (!user) return { ok: false, message: "Not signed in." };
+  .middleware([requireAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .strictObject({
+        metadata: z
+          .strictObject({ display_name: z.string().trim().max(120).optional() })
+          .optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<{ ok: boolean; message?: string }> => {
     if (data.metadata) {
       const { updateUserMetadata } = await import("@/lib/auth/users.server");
-      await updateUserMetadata(user.id, data.metadata);
+      await updateUserMetadata(context.userId, data.metadata);
     }
     return { ok: true };
   });

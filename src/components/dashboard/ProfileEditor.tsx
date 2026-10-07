@@ -105,7 +105,6 @@ import { VerifiedHandleBuilder } from "@/components/settings/VerifiedHandleBuild
 import { ProfileFavoritesAccordion } from "@/components/studio/ProfileFavoritesAccordion";
 import { MAX_FAVORITES } from "@/lib/favorites";
 import { ProfileView } from "@/components/profile/ProfileView";
-import { VerificationPanel } from "@/components/dashboard/VerificationPanel";
 import { DonationPanel } from "@/components/dashboard/DonationPanel";
 import {
   checkStudioHandle,
@@ -1547,19 +1546,6 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                 </AccordionContent>
               </AccordionItem>
 
-              {!verified && !alias && (
-                <AccordionItem
-                  value="verification"
-                  className="rounded-2xl border border-border bg-card px-4 sm:px-5"
-                >
-                  <AccordionTrigger className="hover:no-underline">
-                    <span className="text-base font-medium">🛡️ Identiteitsverificatie</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-4 pb-5">
-                    <VerificationPanel />
-                  </AccordionContent>
-                </AccordionItem>
-              )}
             </Accordion>
           )}
 

@@ -6,7 +6,7 @@ import { ProfileSuspended } from "@/components/profile/ProfileSuspended";
 import { ProfileFrozen } from "@/components/profile/ProfileFrozen";
 import { ProfilePrivate } from "@/components/profile/ProfilePrivate";
 import { useProfileRecord } from "@/hooks/useProfileRecord";
-import { getPublicProfileByHandle } from "@/lib/studio-profile.functions";
+import { getPublicAliasProfileByHandle } from "@/lib/alias-profile.functions";
 import { getRequestLocale } from "@/lib/locale.functions";
 import { canonicalLinks, profileJsonLd, profileSocialMeta, socialMeta } from "@/lib/social-meta";
 import type { Locale } from "@/lib/i18n";
@@ -76,7 +76,7 @@ export const Route = createFileRoute("/u/$username")({
     }
     let row: Row = null;
     try {
-      row = (await getPublicProfileByHandle({ data: { handle } })) as Row;
+      row = (await getPublicAliasProfileByHandle({ data: { handle } })) as Row;
     } catch {
       row = null;
     }

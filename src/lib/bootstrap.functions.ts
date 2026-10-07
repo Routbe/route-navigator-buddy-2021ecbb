@@ -8,10 +8,8 @@ import { z } from "zod";
  */
 export const getBootstrapState = createServerFn({ method: "GET" }).handler(async () => {
   try {
-    const { ensureBootstrapAdmin } = await import("./auth/owner-admin.server");
-    // Zelfherstellend: bestaat er nog geen beheerder, dan krijgt het
-    // eigenaarsaccount (hallo@rout.be) of het oudste account de rol.
-    const hasAdmin = await ensureBootstrapAdmin();
+    const { hasBootstrapAdmin } = await import("./auth/owner-admin.server");
+    const hasAdmin = await hasBootstrapAdmin();
     return { needsFirstAdmin: !hasAdmin };
   } catch {
     return { needsFirstAdmin: false };

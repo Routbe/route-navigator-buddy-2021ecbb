@@ -8,7 +8,8 @@ import { sql } from "@/lib/neon";
  *
  *  1. de eigenaarsadressen (standaard `hallo@rout.be`, te overschrijven met
  *     `OWNER_EMAILS`) krijgen altijd de rol `admin`;
- *  2. is er nog geen enkele beheerder, dan krijgt het oudste account de rol.
+ *  2. het oudste account krijgt de rol uitsluitend na invoer van de eenmalige
+ *     ADMIN_BOOTSTRAP_TOKEN via de beveiligde bootstrapactie.
  *
  * Alles is idempotent — herhaald aanroepen is veilig.
  */
@@ -55,8 +56,8 @@ export async function ensureOwnerAdmin(
       await grantAdmin(userId);
       return;
     }
-    if (await hasAnyAdmin()) return;
-    await ensureBootstrapAdmin();
+    // No automatic fallback: an arbitrary oldest account must never silently
+    // become administrator.
   } catch (error) {
     console.warn("[owner-admin] could not ensure admin role", error);
   }
@@ -67,31 +68,48 @@ export async function ensureOwnerAdmin(
  * anders het oudste account in de database. Geeft terug of er (nu) een
  * beheerder is.
  */
-export async function ensureBootstrapAdmin(): Promise<boolean> {
+export async function hasBootstrapAdmin(): Promise<boolean> {
   try {
-    if (await hasAnyAdmin()) return true;
-
-    const owners = ownerEmails();
-    const ownerRows = (await sql`
-      select id from public.users
-       where lower(email) = any(${owners})
-       order by created_at asc
-       limit 1
-    `) as { id: string }[];
-
-    const target =
-      ownerRows[0] ??
-      (
-        (await sql`
-        select id from public.users order by created_at asc limit 1
-      `) as { id: string }[]
-      )[0];
-
-    if (!target) return false;
-    await grantAdmin(String(target.id));
-    return true;
+    return await hasAnyAdmin();
   } catch (error) {
-    console.warn("[owner-admin] bootstrap admin failed", error);
+    console.warn("[owner-admin] bootstrap state failed", error);
     return false;
   }
+}
+
+function constantTimeEqual(a: string, b: string): boolean {
+  const left = new TextEncoder().encode(a);
+  const right = new TextEncoder().encode(b);
+  if (left.length !== right.length) return false;
+  let difference = 0;
+  for (let index = 0; index < left.length; index += 1) {
+    difference |= (left[index] ?? 0) ^ (right[index] ?? 0);
+  }
+  return difference === 0;
+}
+
+/** One-use promotion for the oldest account, invoked only from an authenticated action. */
+export async function claimBootstrapAdmin(userId: string, token: string): Promise<boolean> {
+  const configured = process.env["ADMIN_BOOTSTRAP_TOKEN"]?.trim();
+  if (!configured || !constantTimeEqual(configured, token.trim())) return false;
+  if (await hasAnyAdmin()) return false;
+
+  const oldest = (await sql`
+    select id from public.users order by created_at asc limit 1
+  `) as { id: string }[];
+  if (oldest[0]?.id !== userId) return false;
+
+  const digest = Array.from(
+    new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(configured))),
+    (byte) => byte.toString(16).padStart(2, "0"),
+  ).join("");
+  const consumed = (await sql`
+    insert into public.admin_bootstrap_tokens (token_hash, consumed_by, consumed_at)
+    values (${digest}, ${userId}, now())
+    on conflict (token_hash) do nothing
+    returning token_hash
+  `) as { token_hash: string }[];
+  if (!consumed[0]) return false;
+  await grantAdmin(userId);
+  return true;
 }

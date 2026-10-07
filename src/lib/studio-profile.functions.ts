@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/lib/auth/middleware";
+import { z } from "zod";
 
 /**
  * Profile Hub Studio RPC layer.
@@ -49,9 +50,32 @@ export type SaveStudioProfileInput = {
   displayPrefs?: Record<string, Json> | null;
 };
 
+const jsonSchema: z.ZodType<Json> = z.lazy(() =>
+  z.union([z.string().max(20_000), z.number().finite(), z.boolean(), z.null(), z.array(jsonSchema).max(100), z.record(jsonSchema)]),
+);
+const optionalUrlSchema = z
+  .string()
+  .trim()
+  .max(2_000)
+  .refine((value) => !value || value.startsWith("https://") || value.startsWith("data:image/"), "invalid_url")
+  .nullable()
+  .optional();
+const saveStudioProfileSchema = z.strictObject({
+  username: z.string().trim().min(1).max(60),
+  displayName: z.string().trim().max(120).nullable().optional(),
+  tagline: z.string().trim().max(240).nullable().optional(),
+  avatarUrl: optionalUrlSchema,
+  faviconUrl: optionalUrlSchema,
+  theme: z.string().trim().min(1).max(40).nullable().optional(),
+  cardStyle: z.string().trim().min(1).max(40).nullable().optional(),
+  blocks: z.array(jsonSchema).max(100).optional(),
+  displayPrefs: z.record(jsonSchema).nullable().optional(),
+});
+const handleSchema = z.strictObject({ handle: z.string().trim().min(1).max(60) });
+
 export const saveStudioProfile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: SaveStudioProfileInput) => input)
+  .inputValidator((input: unknown) => saveStudioProfileSchema.parse(input) as SaveStudioProfileInput)
   .handler(async ({ data, context }) => {
     const { writeStudioProfile } = await import("./studio-profile.server");
     try {
@@ -65,7 +89,7 @@ export const saveStudioProfile = createServerFn({ method: "POST" })
 
 export const checkStudioHandle = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: { handle: string }) => input)
+  .inputValidator((input: unknown) => handleSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { isHandleFree } = await import("./studio-profile.server");
     return isHandleFree(data.handle, context.userId);
@@ -73,7 +97,9 @@ export const checkStudioHandle = createServerFn({ method: "POST" })
 
 export const getStudioAnalytics = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: { days?: number | null }) => input)
+  .inputValidator((input: unknown) =>
+    z.strictObject({ days: z.number().int().min(1).max(3650).nullable().optional() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { readStudioAnalytics } = await import("./studio-profile.server");
     return readStudioAnalytics(context.userId, data.days ?? null);
@@ -81,7 +107,7 @@ export const getStudioAnalytics = createServerFn({ method: "POST" })
 
 /** Public read used by the /@handle profile pages — no auth required. */
 export const getPublicProfileByHandle = createServerFn({ method: "GET" })
-  .inputValidator((input: { handle: string }) => input)
+  .inputValidator((input: unknown) => handleSchema.parse(input))
   .handler(async ({ data }) => {
     const { readPublicProfile } = await import("./studio-profile.server");
     const row = await readPublicProfile(data.handle);
