@@ -78,9 +78,17 @@ const saveAliasProfileSchema = z.strictObject({
 });
 const handleSchema = z.strictObject({ handle: z.string().trim().min(1).max(60) });
 
+function validateAliasProfile(input: unknown): SaveAliasProfileInput {
+  return saveAliasProfileSchema.parse(input) as SaveAliasProfileInput;
+}
+
+function validateHandle(input: unknown): { handle: string } {
+  return handleSchema.parse(input);
+}
+
 export const saveAliasProfile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => saveAliasProfileSchema.parse(input) as SaveAliasProfileInput)
+  .inputValidator(validateAliasProfile)
   .handler(async ({ data, context }) => {
     const { writeAliasProfile } = await import("./alias-profile.server");
     try {
@@ -94,7 +102,7 @@ export const saveAliasProfile = createServerFn({ method: "POST" })
 
 export const checkAliasHandle = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => handleSchema.parse(input))
+  .inputValidator(validateHandle)
   .handler(async ({ data, context }) => {
     const { isAliasHandleFree } = await import("./alias-profile.server");
     return isAliasHandleFree(data.handle, context.userId);
@@ -102,7 +110,7 @@ export const checkAliasHandle = createServerFn({ method: "POST" })
 
 /** Publieke read voor de `/u/<handle>`-pagina's — geen auth nodig. */
 export const getPublicAliasProfileByHandle = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => handleSchema.parse(input))
+  .inputValidator(validateHandle)
   .handler(async ({ data }) => {
     const { readPublicAliasProfile } = await import("./alias-profile.server");
     const row = await readPublicAliasProfile(data.handle);

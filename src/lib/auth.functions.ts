@@ -23,6 +23,18 @@ export type AuthUser = {
   last_sign_in_at: string | null;
 };
 
+type UpdateAuthUserInput = { metadata?: { display_name?: string } };
+
+function validateUpdateAuthUser(input: unknown): UpdateAuthUserInput {
+  return z
+    .strictObject({
+      metadata: z
+        .strictObject({ display_name: z.string().trim().max(120).optional() })
+        .optional(),
+    })
+    .parse(input);
+}
+
 export const getSessionUser = createServerFn({ method: "GET" }).handler(
   async (): Promise<AuthUser | null> => {
     const { currentUser } = await import("@/lib/auth/session.server");
@@ -35,15 +47,7 @@ export const getSessionUser = createServerFn({ method: "GET" }).handler(
 /** Profile metadata only — credentials are managed in Neon Auth. */
 export const updateAuthUser = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .strictObject({
-        metadata: z
-          .strictObject({ display_name: z.string().trim().max(120).optional() })
-          .optional(),
-      })
-      .parse(input),
-  )
+  .inputValidator(validateUpdateAuthUser)
   .handler(async ({ data, context }): Promise<{ ok: boolean; message?: string }> => {
     if (data.metadata) {
       const { updateUserMetadata } = await import("@/lib/auth/users.server");

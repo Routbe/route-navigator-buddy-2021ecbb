@@ -77,9 +77,23 @@ const saveStudioProfileSchema = z.strictObject({
 });
 const handleSchema = z.strictObject({ handle: z.string().trim().min(1).max(60) });
 
+function validateStudioProfile(input: unknown): SaveStudioProfileInput {
+  return saveStudioProfileSchema.parse(input) as SaveStudioProfileInput;
+}
+
+function validateHandle(input: unknown): { handle: string } {
+  return handleSchema.parse(input);
+}
+
+function validateAnalyticsRange(input: unknown): { days?: number | null } {
+  return z
+    .strictObject({ days: z.number().int().min(1).max(3650).nullable().optional() })
+    .parse(input);
+}
+
 export const saveStudioProfile = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => saveStudioProfileSchema.parse(input) as SaveStudioProfileInput)
+  .inputValidator(validateStudioProfile)
   .handler(async ({ data, context }) => {
     const { writeStudioProfile } = await import("./studio-profile.server");
     try {
@@ -93,7 +107,7 @@ export const saveStudioProfile = createServerFn({ method: "POST" })
 
 export const checkStudioHandle = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) => handleSchema.parse(input))
+  .inputValidator(validateHandle)
   .handler(async ({ data, context }) => {
     const { isHandleFree } = await import("./studio-profile.server");
     return isHandleFree(data.handle, context.userId);
@@ -101,9 +115,7 @@ export const checkStudioHandle = createServerFn({ method: "POST" })
 
 export const getStudioAnalytics = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((input: unknown) =>
-    z.strictObject({ days: z.number().int().min(1).max(3650).nullable().optional() }).parse(input),
-  )
+  .inputValidator(validateAnalyticsRange)
   .handler(async ({ data, context }) => {
     const { readStudioAnalytics } = await import("./studio-profile.server");
     return readStudioAnalytics(context.userId, data.days ?? null);
@@ -111,7 +123,7 @@ export const getStudioAnalytics = createServerFn({ method: "POST" })
 
 /** Public read used by the /@handle profile pages — no auth required. */
 export const getPublicProfileByHandle = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => handleSchema.parse(input))
+  .inputValidator(validateHandle)
   .handler(async ({ data }) => {
     const { readPublicProfile } = await import("./studio-profile.server");
     const row = await readPublicProfile(data.handle);

@@ -2,6 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireAuth } from "@/lib/auth/middleware";
 
+function validateBootstrapToken(data: unknown): { token: string } {
+  return z.strictObject({ token: z.string().trim().min(16).max(512) }).parse(data);
+}
+
 /**
  * Development bootstrap probe: reports whether the platform still has no
  * administrator. Returns a single boolean and no PII, so it is safe to call
@@ -20,9 +24,7 @@ export const getBootstrapState = createServerFn({ method: "GET" }).handler(async
 /** Claims the first admin role with the server-configured, single-use token. */
 export const claimFirstAdmin = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((data: unknown) =>
-    z.strictObject({ token: z.string().trim().min(16).max(512) }).parse(data),
-  )
+  .inputValidator(validateBootstrapToken)
   .handler(async ({ data, context }) => {
     const { claimBootstrapAdmin } = await import("./auth/owner-admin.server");
     const ok = await claimBootstrapAdmin(context.userId, data.token);
